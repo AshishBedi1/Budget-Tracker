@@ -1,5 +1,3 @@
-const nodemailer = require('nodemailer')
-
 function envValue(...keys) {
   for (const key of keys) {
     const value = process.env[key]
@@ -8,33 +6,38 @@ function envValue(...keys) {
   return ''
 }
 
-function transport() {
-  const user = envValue('SMTP_USER', 'MAIL_USER')
-  const pass = envValue('SMTP_PASS', 'MAIL_PASSWORD').replace(/\s+/g, '')
-  const host = envValue('SMTP_HOST', 'MAIL_HOST') || 'smtp.gmail.com'
-  const port = Number(envValue('SMTP_PORT', 'MAIL_PORT') || 587)
-  if (!user || !pass) {
-    const error = new Error('email sending is not set up. add MAIL_USER and MAIL_PASSWORD in server/.env')
+async function sendSignupOtp(email, otp) {
+  const apiKey = envValue('BREVO_API_KEY')
+  const from = envValue('MAIL_USER', 'SMTP_USER')
+  if (!apiKey || !from) {
+    const error = new Error('email sending is not set up. add BREVO_API_KEY and MAIL_USER')
     error.status = 503
     throw error
   }
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'api-key': apiKey,
+      'Content-Type': 'application/json',
+      accept: 'application/json',
+    },
+    body: JSON.stringify({
+      sender: { name: 'Expense Tracker', email: from },
+      to: [{ email }],
+      subject: 'Your Expense Tracker code',
+      textContent: `Your signup code is ${otp}. It expires in 10 minutes. If you did not try to create an account, ignore this email.`,
+      htmlContent: `<p>Your signup code is <strong style="font-size:22px;letter-spacing:4px">${otp}</strong>.</p><p>It expires in 10 minutes. If you did not try to create an account, ignore this email.</p>`,
+    }),
   })
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => '')
+    console.error('Brevo send failed', response.status, detail)
+    const error = new Error('could not send the code to that email. check the address and try again.')
+    error.status = 502
+    throw error
+  }
 }
 
-async function sendSignupOtp(email, otp) {
-  const from = envValue('SMTP_FROM', 'SMTP_USER', 'MAIL_USER')
-  await transport().sendMail({
-    from: `"Expense Tracker" <${from}>`,
-    to: email,
-    subject: 'Your Expense Tracker code',
-    text: `Your signup code is ${otp}. It expires in 10 minutes. If you did not try to create an account, ignore this email.`,
-    html: `<p>Your signup code is <strong style="font-size:22px;letter-spacing:4px">${otp}</strong>.</p><p>It expires in 10 minutes. If you did not try to create an account, ignore this email.</p>`,
-  })
-}
-
-module.exports = { sendSignupOtp, transport }
+module.exports = { sendSignupOtp }

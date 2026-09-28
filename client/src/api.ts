@@ -14,6 +14,8 @@ export function setToken(token: string | null) {
   else localStorage.removeItem(TOKEN_KEY)
 }
 
+const apiBase = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
+
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers)
   if (options.body) headers.set('Content-Type', 'application/json')
@@ -22,7 +24,7 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
 
   let response: Response
   try {
-    response = await fetch(path, { ...options, headers })
+    response = await fetch(`${apiBase}${path}`, { ...options, headers })
   } catch {
     throw new Error("can't reach the server. start it and try again.")
   }

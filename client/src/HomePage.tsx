@@ -1,6 +1,7 @@
 type HomePageProps = {
   onJoin: () => void
   onLogin: () => void
+  signedIn?: boolean
 }
 
 const steps = [
@@ -21,24 +22,26 @@ const steps = [
   },
 ]
 
-export default function HomePage({ onJoin, onLogin }: HomePageProps) {
+export default function HomePage({ onJoin, onLogin, signedIn = false }: HomePageProps) {
   return (
     <div className="site">
       <header className="site-header">
         <div className="wrap header-inner">
           <a className="brand" href="#top">
-            <span className="brand-mark">ET</span>
-            <strong>Expense Tracker</strong>
+            <span className="brand-mark">BT</span>
+            <strong>BudgetTracker</strong>
           </a>
           <nav className="nav" aria-label="Site">
             <a href="#how">How it works</a>
             <a href="#preview">The list</a>
-            <button type="button" onClick={onLogin}>
-              Log in
-            </button>
+            {!signedIn && (
+              <button type="button" onClick={onLogin}>
+                Log in
+              </button>
+            )}
           </nav>
           <button type="button" className="primary home-cta" onClick={onJoin}>
-            Create account
+            {signedIn ? 'Open tracker' : 'Create account'}
           </button>
         </div>
       </header>
@@ -50,16 +53,18 @@ export default function HomePage({ onJoin, onLogin }: HomePageProps) {
               <p className="kicker">Daily spending</p>
               <h1>See what is left in each category this month.</h1>
               <p className="hero-lead">
-                Expense Tracker keeps a monthly amount for every category. When you record a spend, that amount
+                BudgetTracker keeps a monthly amount for every category. When you record a spend, that amount
                 goes down. The date starts as today, and you can change it.
               </p>
               <div className="hero-actions">
                 <button type="button" className="primary" onClick={onJoin}>
-                  Create account
+                  {signedIn ? 'Open tracker' : 'Create account'}
                 </button>
-                <button type="button" className="ghost home-secondary" onClick={onLogin}>
-                  Log in
-                </button>
+                {!signedIn && (
+                  <button type="button" className="ghost home-secondary" onClick={onLogin}>
+                    Log in
+                  </button>
+                )}
               </div>
             </div>
             <div className="hero-card" aria-hidden="true">
@@ -124,9 +129,9 @@ export default function HomePage({ onJoin, onLogin }: HomePageProps) {
 
       <footer className="site-footer">
         <div className="wrap footer-inner">
-          <span>Expense Tracker</span>
+          <span>BudgetTracker</span>
           <button type="button" className="text-btn" onClick={onJoin}>
-            Create account
+            {signedIn ? 'Open tracker' : 'Create account'}
           </button>
         </div>
       </footer>

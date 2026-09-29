@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { api, getToken, setToken, type User } from './api'
 import HomePage from './HomePage'
 import {
@@ -38,6 +38,80 @@ const TOUR_STEPS: { tab: Tab; title: string; text: string }[] = [
 
 function tourKey(userId: string) {
   return `expense-tracker.tour.${userId}`
+}
+
+function TourOverlay({
+  step,
+  onSkip,
+  onNext,
+}: {
+  step: number
+  onSkip: () => void
+  onNext: () => void
+}) {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [box, setBox] = useState<{ top: number; left: number } | null>(null)
+  const current = TOUR_STEPS[step]
+
+  useLayoutEffect(() => {
+    const target = document.querySelector('.tour-target')
+    target?.scrollIntoView({ block: 'center', inline: 'nearest' })
+
+    function place() {
+      const node = document.querySelector('.tour-target')
+      const card = cardRef.current
+      if (!node || !card) return
+      const rect = node.getBoundingClientRect()
+      const width = card.offsetWidth
+      const height = card.offsetHeight
+      const gap = 12
+      const margin = 16
+      let top = rect.bottom + gap
+      if (top + height > window.innerHeight - margin) {
+        const above = rect.top - gap - height
+        top = above >= margin ? above : Math.max(margin, window.innerHeight - margin - height)
+      }
+      let left = rect.left
+      if (left + width > window.innerWidth - margin) left = window.innerWidth - margin - width
+      if (left < margin) left = margin
+      setBox((current) => (current && current.top === top && current.left === left ? current : { top, left }))
+    }
+
+    place()
+    window.addEventListener('resize', place)
+    window.addEventListener('scroll', place, true)
+    return () => {
+      window.removeEventListener('resize', place)
+      window.removeEventListener('scroll', place, true)
+    }
+  }, [step])
+
+  if (!current) return null
+
+  return (
+    <div className="tour" role="dialog" aria-labelledby="tour-title">
+      <div className="tour-shade" />
+      <div
+        ref={cardRef}
+        className="tour-card"
+        style={box ? { top: box.top, left: box.left } : undefined}
+      >
+        <p className="kicker">
+          {step + 1} of {TOUR_STEPS.length}
+        </p>
+        <h2 id="tour-title">{current.title}</h2>
+        <p>{current.text}</p>
+        <div className="tour-actions">
+          <button type="button" className="text-btn" onClick={onSkip}>
+            Skip
+          </button>
+          <button type="button" className="primary" onClick={onNext}>
+            {step === TOUR_STEPS.length - 1 ? 'Done' : 'Next'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function statusLine(total: number) {
@@ -115,12 +189,14 @@ function AuthScreen({
   return (
     <div className="auth-screen">
       <aside className="auth-aside">
-        <span className="brand-mark">ET</span>
-        <h2>Expense Tracker</h2>
+        <button type="button" className="brand" onClick={onBack} aria-label="Home">
+          <span className="brand-mark">BT</span>
+        </button>
+        <h2>BudgetTracker</h2>
         <p>Record daily spending, set a monthly amount for each category, and see what is left.</p>
       </aside>
       <form className="auth-card" onSubmit={submit}>
-        <p className="kicker">Expense Tracker</p>
+        <p className="kicker">BudgetTracker</p>
         <h1>{confirming ? 'Check your email' : mode === 'join' ? 'Create your account' : 'Welcome back'}</h1>
         <p className="mood-line">
           {confirming
@@ -210,10 +286,11 @@ function App() {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [gate, setGate] = useState<'home' | 'join' | 'login'>('home')
+  const [showHome, setShowHome] = useState(false)
   const [tourStep, setTourStep] = useState<number | null>(null)
 
   useEffect(() => {
-    document.title = user?.email ? `Expense Tracker · ${user.email}` : 'Expense Tracker'
+    document.title = user?.email ? `BudgetTracker · ${user.email}` : 'BudgetTracker'
   }, [user])
 
   useEffect(() => {
@@ -244,6 +321,11 @@ function App() {
     setTourStep(0)
     setTab('today')
   }, [boot, user, categories.length])
+
+  useEffect(() => {
+    if (tourStep !== 3 || categories.length === 0) return
+    setSelectedCategoryId(categories[0].id)
+  }, [tourStep, categories])
 
   function finishTour() {
     if (user) localStorage.setItem(tourKey(user.id), 'done')
@@ -442,6 +524,7 @@ function App() {
     setExpenses([])
     setBoot('guest')
     setGate('home')
+    setShowHome(false)
   }
 
   const dayLabel = day === today ? 'Today' : formatDay(day)
@@ -459,6 +542,22 @@ function App() {
       <div className="auth-screen">
         <p className="mood-line">Loading your account…</p>
       </div>
+    )
+  }
+
+  if (showHome) {
+    return (
+      <HomePage
+        signedIn={Boolean(user)}
+        onJoin={() => {
+          setShowHome(false)
+          if (!user) setGate('join')
+        }}
+        onLogin={() => {
+          setShowHome(false)
+          setGate('login')
+        }}
+      />
     )
   }
 
@@ -488,13 +587,13 @@ function App() {
     <div className="site">
       <header className="site-header">
         <div className="wrap header-inner">
-          <div className="brand">
-            <span className="brand-mark">ET</span>
+          <button type="button" className="brand" onClick={() => setShowHome(true)} aria-label="Home">
+            <span className="brand-mark">BT</span>
             <div>
-              <strong>Expense Tracker</strong>
+              <strong>BudgetTracker</strong>
               <span>{user.email}</span>
             </div>
-          </div>
+          </button>
           <nav className="nav" aria-label="Site">
             {(
               [
@@ -764,25 +863,8 @@ function App() {
       <footer className="site-footer">
         <div className="wrap">saved in your account.</div>
       </footer>
-      {tourStep !== null && TOUR_STEPS[tourStep] && (
-        <div className="tour" role="dialog" aria-labelledby="tour-title">
-          <div className="tour-shade" />
-          <div className="tour-card">
-            <p className="kicker">
-              {tourStep + 1} of {TOUR_STEPS.length}
-            </p>
-            <h2 id="tour-title">{TOUR_STEPS[tourStep].title}</h2>
-            <p>{TOUR_STEPS[tourStep].text}</p>
-            <div className="tour-actions">
-              <button type="button" className="text-btn" onClick={finishTour}>
-                Skip
-              </button>
-              <button type="button" className="primary" onClick={nextTour}>
-                {tourStep === TOUR_STEPS.length - 1 ? 'Done' : 'Next'}
-              </button>
-            </div>
-          </div>
-        </div>
+      {tourStep !== null && (
+        <TourOverlay step={tourStep} onSkip={finishTour} onNext={nextTour} />
       )}
     </div>
   )

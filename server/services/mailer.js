@@ -23,9 +23,9 @@ async function sendSignupOtp(email, otp) {
       accept: 'application/json',
     },
     body: JSON.stringify({
-      sender: { name: 'Expense Tracker', email: from },
+      sender: { name: 'BudgetTracker', email: from },
       to: [{ email }],
-      subject: 'Your Expense Tracker code',
+      subject: 'Your BudgetTracker code',
       textContent: `Your signup code is ${otp}. It expires in 10 minutes. If you did not try to create an account, ignore this email.`,
       htmlContent: `<p>Your signup code is <strong style="font-size:22px;letter-spacing:4px">${otp}</strong>.</p><p>It expires in 10 minutes. If you did not try to create an account, ignore this email.</p>`,
     }),

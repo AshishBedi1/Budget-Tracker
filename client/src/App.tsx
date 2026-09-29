@@ -390,6 +390,11 @@ function App() {
     return monthLeft(category.monthlyBudget, spentIn(category.id, month))
   }
 
+  const viewMonth = day.slice(0, 7)
+  const monthBudget = categories.reduce((sum, category) => sum + category.monthlyBudget, 0)
+  const monthSpentView = categories.reduce((sum, category) => sum + spentIn(category.id, viewMonth), 0)
+  const monthRemaining = Math.round((monthBudget - monthSpentView) * 100) / 100
+
   function openCategory(id: string) {
     setFormError('')
     if (selectedCategoryId === id) {
@@ -640,12 +645,6 @@ function App() {
           {tab === 'today' && (
             <div className="today-layout">
               <div className="today-toolbar">
-                <section className={tourStep === 0 ? 'summary tour-target' : 'summary'}>
-                  <div>
-                    <p className="label">Spent today</p>
-                    <p className="total">{formatMoney(dayTotal)}</p>
-                  </div>
-                </section>
                 <div className={tourStep === 1 ? 'day-switch tour-target' : 'day-switch'}>
                   <button type="button" onClick={() => setDay(shiftISO(day, -1))} aria-label="Previous day">
                     ‹
@@ -673,16 +672,29 @@ function App() {
                     ›
                   </button>
                 </div>
+                <section className={tourStep === 0 ? 'summary tour-target' : 'summary'}>
+                  <div>
+                    <p className="label">Spent today</p>
+                    <p className="total">{formatMoney(dayTotal)}</p>
+                  </div>
+                </section>
+              </div>
+              <div className="month-totals">
+                <section>
+                  <p className="label">Total this month</p>
+                  <p className="total">{formatMoney(monthBudget)}</p>
+                </section>
+                <section>
+                  <p className="label">Left this month</p>
+                  <p className={monthRemaining < 0 ? 'total over' : 'total'}>
+                    {monthRemaining < 0 ? `${formatMoney(Math.abs(monthRemaining))} over` : formatMoney(monthRemaining)}
+                  </p>
+                </section>
               </div>
 
               <section className={tourStep === 3 ? 'panel tour-target' : 'panel'}>
                 {categories.length === 0 ? (
-                  <div className="empty empty-today">
-                    <p>No categories yet. Add one from Add category.</p>
-                    <button type="button" className="primary" onClick={() => setTab('categories')}>
-                      Add category
-                    </button>
-                  </div>
+                  <p className="empty">No categories yet. Add one below.</p>
                 ) : (
                   <>
                     <div className="list-head">
@@ -702,9 +714,9 @@ function App() {
                               <span className="budget-figure">{formatMoney(category.monthlyBudget)}</span>
                             </button>
                             {open && (
-                              <>
+                              <div className="spend-body">
                                 {details.length === 0 ? (
-                                  <p className="empty inner-empty">Nothing recorded in this category for this day.</p>
+                                  <p className="inner-empty">Nothing recorded in this category for this day.</p>
                                 ) : (
                                   <ul className="spend-details">
                                     {details.map((expense) => (
@@ -720,15 +732,6 @@ function App() {
                                 )}
                                 <form className="spend-entry" onSubmit={addExpense}>
                                   <label>
-                                    Amount
-                                    <input
-                                      inputMode="decimal"
-                                      placeholder="240"
-                                      value={amount}
-                                      onChange={(event) => setAmount(event.target.value)}
-                                    />
-                                  </label>
-                                  <label>
                                     Details
                                     <input
                                       placeholder="What you bought"
@@ -737,12 +740,21 @@ function App() {
                                       onChange={(event) => setNote(event.target.value)}
                                     />
                                   </label>
+                                  <label>
+                                    Amount
+                                    <input
+                                      inputMode="decimal"
+                                      placeholder="240"
+                                      value={amount}
+                                      onChange={(event) => setAmount(event.target.value)}
+                                    />
+                                  </label>
                                   {formError && <p className="error">{formError}</p>}
                                   <button type="submit" className="primary" disabled={saving}>
                                     Save
                                   </button>
                                 </form>
-                              </>
+                              </div>
                             )}
                           </li>
                         )
@@ -750,6 +762,9 @@ function App() {
                     </ul>
                   </>
                 )}
+                <button type="button" className="primary list-add" onClick={() => setTab('categories')}>
+                  Add category
+                </button>
               </section>
             </div>
           )}

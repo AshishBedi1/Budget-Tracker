@@ -369,13 +369,19 @@ input:focus {
   background: #fff;
 }
 
+.spend-body {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid #e4e8ee;
+}
+
 .spend-entry {
   display: grid;
-  grid-template-columns: 160px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 140px auto;
   gap: 12px;
   align-items: end;
-  padding: 12px 0 0;
-  border-top: 1px solid #e4e8ee;
 }
 
 .spend-entry .error {
@@ -383,7 +389,12 @@ input:focus {
 }
 
 .spend-entry .primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
   min-width: 96px;
+  padding: 0 16px;
 }
 
 .spend-entry label {
@@ -398,10 +409,11 @@ input:focus {
 
 .spend-entry input {
   width: 100%;
+  height: 42px;
   border: 1px solid #d5dbe3;
   background: #fff;
   border-radius: 8px;
-  padding: 11px 12px;
+  padding: 0 12px;
   outline: none;
   text-transform: none;
   letter-spacing: 0;
@@ -416,19 +428,9 @@ input:focus {
   border: 1px dashed #d5dbe3;
 }
 
-.empty-today {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.empty-today p {
-  margin: 0;
-}
-
-.empty-today .primary {
-  flex: none;
+.list-add {
+  width: 100%;
+  margin-top: 14px;
 }
 
 .spend-list,
@@ -460,10 +462,12 @@ input:focus {
 
 .today-toolbar .summary {
   min-width: 0;
+  margin-left: auto;
   padding: 0;
   background: transparent;
   border: 0;
   box-shadow: none;
+  text-align: right;
 }
 
 .today-toolbar .day-switch {
@@ -473,6 +477,29 @@ input:focus {
 
 .today-toolbar .total {
   font-size: 28px;
+}
+
+.month-totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.month-totals section {
+  background: #fff;
+  border: 1px solid #e4e8ee;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgb(23 32 51 / 4%);
+}
+
+.month-totals .total {
+  font-size: 22px;
+}
+
+.month-totals .over {
+  color: #b42318;
 }
 
 .list-head,
@@ -533,13 +560,17 @@ input:focus {
 
 .inner-empty {
   margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #526074;
+  font-size: 14px;
 }
 
 .spend-details {
   list-style: none;
-  margin: 4px 0 0;
-  padding: 8px 0 0;
-  border-top: 1px solid #e4e8ee;
+  margin: 0;
+  padding: 0;
   display: grid;
   gap: 4px;
 }
@@ -1189,21 +1220,23 @@ input:focus {
   .category-form,
   .spend-entry {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     position: static;
   }
 
+  .spend-entry .primary,
+  .spend-entry .error {
+    grid-column: 1 / -1;
+  }
+
+  .spend-entry .primary {
+    width: 100%;
+  }
+
   .today-toolbar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .empty-today {
-    display: block;
-  }
-
-  .empty-today .primary {
-    display: none;
+    align-items: center;
+    flex-direction: row;
+    gap: 12px;
   }
 
   .list-head,

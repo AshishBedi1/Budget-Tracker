@@ -294,6 +294,33 @@ function App() {
   }, [user])
 
   useEffect(() => {
+    const viewport = window.visualViewport
+    if (!viewport) return
+
+    function onResize() {
+      const phone = window.matchMedia('(max-width: 860px)').matches
+      const keyboard = phone && window.innerHeight - viewport.height > 120
+      document.documentElement.classList.toggle('keyboard-open', keyboard)
+    }
+
+    function onFocusIn(event: FocusEvent) {
+      const target = event.target
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return
+      window.setTimeout(() => {
+        target.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+      }, 350)
+    }
+
+    viewport.addEventListener('resize', onResize)
+    document.addEventListener('focusin', onFocusIn)
+    return () => {
+      viewport.removeEventListener('resize', onResize)
+      document.removeEventListener('focusin', onFocusIn)
+      document.documentElement.classList.remove('keyboard-open')
+    }
+  }, [])
+
+  useEffect(() => {
     if (!getToken()) {
       setBoot('guest')
       return

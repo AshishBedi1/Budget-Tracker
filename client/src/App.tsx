@@ -298,8 +298,10 @@ function App() {
     if (!viewport) return
 
     function onResize() {
+      const height = viewport?.height
+      if (height == null) return
       const phone = window.matchMedia('(max-width: 860px)').matches
-      const keyboard = phone && window.innerHeight - viewport.height > 120
+      const keyboard = phone && window.innerHeight - height > 120
       document.documentElement.classList.toggle('keyboard-open', keyboard)
     }
 

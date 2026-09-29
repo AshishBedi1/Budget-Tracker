@@ -584,8 +584,8 @@ function App() {
   }
 
   return (
-    <div className="site">
-      <header className="site-header">
+    <div className="site app-shell">
+      <header className="site-header app-header">
         <div className="wrap header-inner">
           <button type="button" className="brand" onClick={() => setShowHome(true)} aria-label="Home">
             <span className="brand-mark">BT</span>
@@ -594,7 +594,7 @@ function App() {
               <span>{user.email}</span>
             </div>
           </button>
-          <nav className="nav" aria-label="Site">
+          <nav className="nav app-nav" aria-label="Site">
             {(
               [
                 ['today', 'Today'],
@@ -615,6 +615,15 @@ function App() {
           <button type="button" className="ghost logout" onClick={logout}>
             Log out
           </button>
+          <details className="account-menu">
+            <summary>Account</summary>
+            <div className="account-panel">
+              <p>{user.email}</p>
+              <button type="button" className="ghost logout" onClick={logout}>
+                Log out
+              </button>
+            </div>
+          </details>
         </div>
       </header>
 
@@ -641,16 +650,20 @@ function App() {
                   <button type="button" onClick={() => setDay(shiftISO(day, -1))} aria-label="Previous day">
                     ‹
                   </button>
-                  <input
-                    type="date"
-                    max={today}
-                    value={day}
-                    aria-label={formatDay(day)}
-                    onChange={(event) => {
-                      const next = event.target.value
-                      setDay(next && next <= today ? next : today)
-                    }}
-                  />
+                  <label className="day-face">
+                    <strong>{day === today ? 'Today' : formatDay(day)}</strong>
+                    {day === today && <small>{formatDay(day)}</small>}
+                    <input
+                      type="date"
+                      max={today}
+                      value={day}
+                      aria-label={formatDay(day)}
+                      onChange={(event) => {
+                        const next = event.target.value
+                        setDay(next && next <= today ? next : today)
+                      }}
+                    />
+                  </label>
                   <button
                     type="button"
                     onClick={() => setDay(shiftISO(day, 1))}
@@ -664,7 +677,12 @@ function App() {
 
               <section className={tourStep === 3 ? 'panel tour-target' : 'panel'}>
                 {categories.length === 0 ? (
-                  <p className="empty">No categories yet. Add one from Add category.</p>
+                  <div className="empty empty-today">
+                    <p>No categories yet. Add one from Add category.</p>
+                    <button type="button" className="primary" onClick={() => setTab('categories')}>
+                      Add category
+                    </button>
+                  </div>
                 ) : (
                   <>
                     <div className="list-head">

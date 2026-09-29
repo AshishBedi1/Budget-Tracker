@@ -287,13 +287,40 @@ input:focus {
   gap: 10px;
 }
 
-.day-switch input[type='date'] {
-  height: 40px;
-  border: 1px solid #d5dbe3;
-  background: #fff;
-  border-radius: 8px;
-  padding: 0 12px;
+.day-face {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 7.5rem;
+  padding: 2px 8px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.day-face strong {
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.day-face small {
+  color: #667085;
+  font-size: 12px;
   font-weight: 600;
+  line-height: 1.2;
+}
+
+.day-face input[type='date'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .panel-head {
@@ -387,6 +414,21 @@ input:focus {
   border-radius: 10px;
   padding: 16px;
   border: 1px dashed #d5dbe3;
+}
+
+.empty-today {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.empty-today p {
+  margin: 0;
+}
+
+.empty-today .primary {
+  flex: none;
 }
 
 .spend-list,
@@ -667,6 +709,10 @@ input:focus {
 .logout {
   border: 1px solid #d5dbe3 !important;
   background: #fff !important;
+}
+
+.account-menu {
+  display: none;
 }
 
 .auth-screen {
@@ -992,10 +1038,150 @@ input:focus {
     gap: 12px;
   }
 
+  .app-shell {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+
+  .app-header .header-inner {
+    flex-wrap: nowrap;
+    min-height: 56px;
+    gap: 12px;
+  }
+
+  .app-header .brand {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .app-header .brand strong {
+    display: none;
+  }
+
+  .app-header .brand div {
+    min-width: 0;
+  }
+
+  .app-header .brand div span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-header > .wrap > .logout {
+    display: none;
+  }
+
+  .account-menu {
+    display: block;
+    position: relative;
+    flex: none;
+  }
+
+  .account-menu summary {
+    list-style: none;
+    cursor: pointer;
+    border: 1px solid #d5dbe3;
+    background: #fff;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 650;
+    color: #16324f;
+  }
+
+  .account-menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .account-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 30;
+    width: min(260px, 70vw);
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #e4e8ee;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgb(23 32 51 / 12%);
+  }
+
+  .account-panel p {
+    margin: 0;
+    color: #526074;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  .account-panel .logout {
+    justify-self: start;
+  }
+
+  .app-nav {
+    position: fixed;
+    z-index: 20;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: #fff;
+    border-top: 1px solid #e4e8ee;
+    box-shadow: 0 -8px 24px rgb(23 32 51 / 6%);
+  }
+
+  .app-nav button {
+    min-height: 56px;
+    border-radius: 0;
+    padding: 8px 6px;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .app-nav button.active {
+    background: #e8eef6;
+    box-shadow: inset 0 2px 0 #16324f;
+  }
+
+  .app-shell .page {
+    padding-top: 16px;
+    padding-bottom: 20px;
+  }
+
+  .app-shell .page-hero {
+    margin-bottom: 12px;
+  }
+
+  .app-shell .page-hero .kicker {
+    display: none;
+  }
+
+  .app-shell h1 {
+    font-size: 22px;
+    margin-top: 0;
+  }
+
+  .app-shell .mood-line {
+    font-size: 14px;
+  }
+
   .nav {
     width: 100%;
     margin-left: 0;
     overflow: auto;
+  }
+
+  .app-shell .app-nav {
+    width: 100%;
+    margin: 0;
+    overflow: visible;
   }
 
   .split,
@@ -1012,13 +1198,39 @@ input:focus {
     flex-direction: column;
   }
 
-  .list-head {
+  .empty-today {
+    display: block;
+  }
+
+  .empty-today .primary {
     display: none;
   }
 
+  .list-head,
   .spend-category {
-    grid-template-columns: 1fr;
-    gap: 4px;
+    grid-template-columns: minmax(0, 1fr) max-content max-content;
+    gap: 8px;
+  }
+
+  .list-head {
+    padding: 0 4px 8px;
+    font-size: 10px;
+  }
+
+  .spend-category strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .spend-category strong,
+  .spend-category span {
+    font-size: 13px;
+  }
+
+  .spend-category span {
+    white-space: nowrap;
+    text-align: right;
   }
 
   h1,
